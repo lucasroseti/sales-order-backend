@@ -1,7 +1,9 @@
 @localhost=localhost:4004/odata/v4/main/
 @id=3ac177dc-a55c-424c-8c4b-cfcf6fe9cfd5
+@customerId=73f695b2-72ce-4730-b35c-914832858b26
+@productId=60fded5c-5065-466d-b1a4-b14dfb3f1ce3
 
-GET http://{{localhost}}/SalesOrderHeaders
+GET http://{{localhost}}/SalesOrderHeaders?$filter=id eq {{id}}&$expand=items
 Content-Type: application/json
 
 ###
@@ -9,7 +11,27 @@ Content-Type: application/json
 POST http://{{localhost}}/SalesOrderHeaders
 Content-Type: application/json
 
-{}
+{
+    "id": "{{id}}",
+    "customer_id": "{{customerId}}",
+    "totalAmount": 398,
+    "items": [
+        {
+            "id": "efd4dd0a-990b-404b-b49c-a256e420b3cf",
+            "header_id": "{{id}}",
+            "product_id": "{{productId}}",
+            "quantity": 10,
+            "price": 2.99
+        },
+        {
+            "id": "38d842f1-c347-4684-8ea2-080f6c235eba",
+            "header_id": "{{id}}",
+            "product_id": "{{productId}}",
+            "quantity": 5,
+            "price": 1.99
+        }
+    ]
+}
 
 ###
 
