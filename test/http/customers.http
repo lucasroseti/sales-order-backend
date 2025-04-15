@@ -37,3 +37,10 @@ GET http://{{localhost}}/Customers?$filter=not endswith(firstName, '-5940057') a
 Content-Type: application/json
 
 ###
+
+# Buscando dados com $search
+GET http://{{localhost}}/Customers?$search=868
+Content-Type: application/json
+
+###
+
