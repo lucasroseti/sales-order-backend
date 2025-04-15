@@ -54,3 +54,13 @@ GET http://{{localhost}}/SalesOrderHeaders?$filter=totalAmount ge 2000000
 Content-Type: application/json
 
 ###
+
+# Expandir os itens do pedido, o cliente e expandir o produto do item
+GET http://{{localhost}}/SalesOrderHeaders?$filter=totalAmount le 6000000&$expand=items($expand=product),customer
+Content-Type: application/json
+
+###
+
+# Expandir os itens do pedido, o cliente e expandir o produto do item e filtrar pela quantidade nos itens
+GET http://{{localhost}}/SalesOrderHeaders?$expand=items($expand=product;$filter=quantity le 30),customer
+Content-Type: application/json
