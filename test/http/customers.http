@@ -44,3 +44,9 @@ Content-Type: application/json
 
 ###
 
+# Ordenando dados com $orderby
+GET http://{{localhost}}/Customers?$orderby=firstName desc,lastName desc
+Content-Type: application/json
+
+###
+
