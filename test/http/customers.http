@@ -29,3 +29,11 @@ Content-Type: application/json
 {
     "firstName": "Mark"
 }
+
+###
+
+# Buscar todos os clientes que não terminam com '-5940057'
+GET http://{{localhost}}/Customers?$filter=not endswith(firstName, '-5940057') and email eq 'email-4867866'
+Content-Type: application/json
+
+###

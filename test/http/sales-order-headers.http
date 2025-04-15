@@ -46,3 +46,11 @@ Content-Type: application/json
 {
     "modifiedBy": "teste"
 }
+
+###
+
+# Buscar todos os pedidos maiores ou iguais a x valor
+GET http://{{localhost}}/SalesOrderHeaders?$filter=totalAmount ge 2000000
+Content-Type: application/json
+
+###
