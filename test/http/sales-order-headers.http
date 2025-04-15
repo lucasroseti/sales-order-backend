@@ -64,3 +64,17 @@ Content-Type: application/json
 # Expandir os itens do pedido, o cliente e expandir o produto do item e filtrar pela quantidade nos itens
 GET http://{{localhost}}/SalesOrderHeaders?$expand=items($expand=product;$filter=quantity le 30),customer
 Content-Type: application/json
+
+###
+
+# Selecionar somente customer e id do sales order header e expandir o customer
+GET http://{{localhost}}/SalesOrderHeaders?$select=id,customer&$expand=customer
+Content-Type: application/json
+
+###
+
+# Selecionar somente customer e id do sales order header e expandir o customer e selecionar somente o email do customer
+GET http://{{localhost}}/SalesOrderHeaders?$select=id,customer&$expand=customer($select=email)
+Content-Type: application/json
+
+###
