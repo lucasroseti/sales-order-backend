@@ -2,7 +2,7 @@
 @id=3ac177dc-a55c-424c-8c4b-cfcf6fe9cfd5
 @customerId=48678748-1c02-4712-9cf3-808ccae903c8
 # produto sem estoque
-@productId1=673103c4-2e5b-4d59-be42-33924136b05e
+@productId1=26013947-e95b-48b3-a5bb-1ef81ebdbaca
 @productId2=26013947-e95b-48b3-a5bb-1ef81ebdbaca
 
 GET http://{{localhost}}/SalesOrderHeaders?$filter=id eq {{id}}&$expand=items
@@ -13,12 +13,11 @@ Authorization: Basic joaozinho:Inicial@12345
 
 POST http://{{localhost}}/SalesOrderHeaders
 Content-Type: application/json
-Authorization: Basic joaozinho:Inicial@12345
+Authorization: Basic cuka:Inicial@12345
 
 {
     "id": "{{id}}",
     "customer_id": "{{customerId}}",
-    "totalAmount": 398,
     "items": [
         {
             "id": "efd4dd0a-990b-404b-b49c-a256e420b3cf",
