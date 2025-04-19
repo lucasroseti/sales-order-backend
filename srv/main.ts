@@ -2,6 +2,16 @@ import cds, { Request, Service } from '@sap/cds';
 import { Customers, Product, Products, SalesOrderHeaders, SalesOrderItem, SalesOrderItems } from '@models/sales';
 
 export default (service: Service) => {
+    service.before('READ', '*', async (request: Request) => {
+        if (!request.user.is('read_only_user')) {
+            return request.reject(403, 'Forbidden');
+        }
+    });
+    service.before(['WRITE','DELETE'], '*', async (request: Request) => {
+        if (!request.user.is('admin')) {
+            return request.reject(403, 'Not allowed create or delete operations');
+        }
+    });
     service.after('READ', 'Customers', (results: Customers) => {
         results.forEach(customer => {
             if (!customer.email.includes('@')) {
