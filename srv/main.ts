@@ -11,7 +11,7 @@ export default (service: Service) => {
             return request.reject(403, 'Forbidden');
         }
     });
-    service.before(['WRITE','DELETE'], '*', async (request: Request) => {
+    service.before(['WRITE', 'DELETE'], '*', async (request: Request) => {
         if (!request.user.is('admin')) {
             return request.reject(403, 'Not allowed create or delete operations');
         }

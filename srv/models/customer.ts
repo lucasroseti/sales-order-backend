@@ -3,7 +3,7 @@ export type CustomerProps = {
     firstName: string;
     lastName: string;
     email: string;
-}
+};
 
 export class CustomerModel {
     constructor(private props: CustomerProps) {}
@@ -32,7 +32,7 @@ export class CustomerModel {
         if (!this.props.email.includes('@')) {
             this.props.email = `${this.props.email}@email.com`;
         }
-        return this;   
+        return this;
     }
 
     public toObject(): CustomerProps {
@@ -40,7 +40,7 @@ export class CustomerModel {
             id: this.id,
             firstName: this.firstName,
             lastName: this.lastName,
-            email: this.email,
+            email: this.email
         };
     }
 }

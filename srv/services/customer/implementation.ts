@@ -9,7 +9,7 @@ export class CustomerServiceImpl implements CustomerService {
                 id: c.id as string,
                 firstName: c.firstName as string,
                 lastName: c.lastName as string,
-                email: c.email as string,
+                email: c.email as string
             });
             return customer.setDefaultEmailDomain().toObject();
         });

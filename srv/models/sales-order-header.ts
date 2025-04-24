@@ -77,7 +77,7 @@ export class SalesOrderHeaderModel {
             return { hasError: true, error: new Error('Items are required') };
         }
         const itemsErrors: string[] = [];
-        items.forEach(item => {
+        items.forEach((item) => {
             const validationResult = item.validateCreationPayload({ product_id: item.productId });
             if (validationResult.hasError) {
                 itemsErrors.push(validationResult.error?.message as string);
@@ -92,7 +92,7 @@ export class SalesOrderHeaderModel {
 
     public calculateTotalAmount(): number {
         let totalAmount = 0;
-        this.items.forEach(item => {
+        this.items.forEach((item) => {
             totalAmount += (item.price as number) * (item.quantity as number);
         });
         return totalAmount;
@@ -101,14 +101,14 @@ export class SalesOrderHeaderModel {
     public calculateDiscount(): number {
         let totalAmount = this.calculateTotalAmount();
         if (totalAmount > 30000) {
-            const discount = totalAmount * (10/100);
+            const discount = totalAmount * (10 / 100);
             totalAmount = totalAmount - discount;
         }
         return totalAmount;
     }
 
-    public getProductsData(): { id: string, quantity: number }[] {
-        return this.items.map(item => ({
+    public getProductsData(): { id: string; quantity: number }[] {
+        return this.items.map((item) => ({
             id: item.productId,
             quantity: item.quantity
         }));

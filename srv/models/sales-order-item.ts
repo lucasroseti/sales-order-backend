@@ -6,7 +6,7 @@ export type SalesOrderItemProps = {
     quantity: number;
     price: number;
     products: ProductModel[];
-}
+};
 
 type SalesOrderItemPropsWithoutId = Omit<SalesOrderItemProps, 'id'>;
 
@@ -25,10 +25,10 @@ export class SalesOrderItemModel {
     public static create(props: SalesOrderItemPropsWithoutId): SalesOrderItemModel {
         return new SalesOrderItemModel({
             ...props,
-            id: crypto.randomUUID(),
+            id: crypto.randomUUID()
         });
     }
-    
+
     public get id() {
         return this.props.id;
     }
@@ -50,17 +50,17 @@ export class SalesOrderItemModel {
     }
 
     public validateCreationPayload(params: CreationPayload): CreationPayloadValidationResult {
-        const product = this.products.find(product => product.id === params.product_id);
+        const product = this.products.find((product) => product.id === params.product_id);
         if (!product) {
             return {
                 hasError: true,
-                error: new Error(`Product ${params.product_id} not found`),
+                error: new Error(`Product ${params.product_id} not found`)
             };
         }
         if (product.stock === 0) {
             return {
                 hasError: true,
-                error: new Error(`Product ${product.name} not in stock`),
+                error: new Error(`Product ${product.name} not in stock`)
             };
         }
         return { hasError: false };

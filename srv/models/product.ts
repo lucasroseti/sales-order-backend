@@ -3,12 +3,12 @@ export type ProductProps = {
     name: string;
     price: number;
     stock: number;
-}
+};
 
 export type SellValidationResult = {
     hasError: boolean;
     error?: Error;
-}
+};
 
 export class ProductModel {
     constructor(private props: ProductProps) {}
@@ -41,12 +41,12 @@ export class ProductModel {
         if (this.stock < amount) {
             return {
                 hasError: true,
-                error: new Error('Not enough stock'),
+                error: new Error('Not enough stock')
             };
         }
         this.stock -= amount;
         return {
-            hasError: false,
+            hasError: false
         };
     }
 }

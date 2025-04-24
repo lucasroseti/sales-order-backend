@@ -44,9 +44,9 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
 
     public async afterCreate(params: SalesOrderHeaders, loggedUser: User): Promise<void> {
         const logs: SalesOrderLogModel[] = [];
-        const headersAsArray = Array.isArray(params) ? params : [params] as SalesOrderHeaders;
+        const headersAsArray = Array.isArray(params) ? params : ([params] as SalesOrderHeaders);
         for (const header of headersAsArray) {
-            const products = await this.getProductsByIds(header) as ProductModel[];
+            const products = (await this.getProductsByIds(header)) as ProductModel[];
             const items = this.getSalesOrderItems(header, products);
             const salesOrderHeader = this.getExistingSalesOrderHeader(header, items);
             const productsData = salesOrderHeader.getProductsData();
@@ -69,18 +69,20 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
     }
 
     private getSalesOrderItems(params: SalesOrderHeader, products: ProductModel[]): SalesOrderItemModel[] {
-        return params.items?.map((item: SalesOrderItem) => SalesOrderItemModel.create({
-            price: item.price as number,
-            productId: item.product_id as string,
-            quantity: item.quantity as number,
-            products
-        })) as SalesOrderItemModel[];
+        return params.items?.map((item: SalesOrderItem) =>
+            SalesOrderItemModel.create({
+                price: item.price as number,
+                productId: item.product_id as string,
+                quantity: item.quantity as number,
+                products
+            })
+        ) as SalesOrderItemModel[];
     }
 
     private getSalesOrderHeader(params: SalesOrderHeader, items: SalesOrderItemModel[]): SalesOrderHeaderModel {
         return SalesOrderHeaderModel.create({
             customerId: params.customer_id as string,
-            items,
+            items
         });
     }
 
@@ -89,7 +91,7 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
             id: params.id as string,
             customerId: params.customer_id as string,
             totalAmount: params.totalAmount as number,
-            items,
+            items
         });
     }
 
@@ -104,8 +106,8 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
             roles: loggedUser.roles as unknown as string[],
             attributes: {
                 id: loggedUser.attr.id as unknown as number,
-                groups: loggedUser.attr.groups as unknown as string[],
-            },
+                groups: loggedUser.attr.groups as unknown as string[]
+            }
         });
     }
 
@@ -113,7 +115,7 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
         return SalesOrderLogModel.create({
             headerId: salesOrderHeader.id,
             orderData: salesOrderHeader.toStringifiedObject(),
-            userData: user.toStringifiedObject(),
+            userData: user.toStringifiedObject()
         });
     }
 }
