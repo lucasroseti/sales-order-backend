@@ -15,7 +15,7 @@
     "@cap-js/cds-types": "^0.10.0",
     "@cap-js/sqlite": "^1",
     "@eslint/js": "^9.25.1",
-    "@eslint/json": "^0.12.0",
+    "@types/axios": "^0.14.4",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^22.14.1",
     "chai": "^5.2.0",
