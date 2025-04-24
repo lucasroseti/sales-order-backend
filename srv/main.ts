@@ -1,9 +1,12 @@
+import './configs/module-alias';
+
 import { Request, Service } from '@sap/cds';
 
-import { FullRequestParams } from './protocols';
-import { customerController } from './factories/controllers/customer';
-import { salesOrderHeaderController } from './factories/controllers/sales-order-header';
 import { Customers, SalesOrderHeaders } from '@models/sales';
+
+import { FullRequestParams } from '@/protocols';
+import { customerController } from '@/factories/controllers/customer';
+import { salesOrderHeaderController } from '@/factories/controllers/sales-order-header';
 
 export default (service: Service) => {
     service.before('READ', '*', async (request: Request) => {
