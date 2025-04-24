@@ -7,7 +7,7 @@ export default [
     {
         languageOptions: {
             globals: globals.node
-        },
+        }
     },
     pluginJs.configs.recommended,
     ...tseslint.configs.recommended,
@@ -25,7 +25,7 @@ export default [
                     tabWidth: 4,
                     trailingComma: 'none',
                     bracketSpacing: true,
-                    printWidth: 120,
+                    printWidth: 120
                 }
             ],
             '@typescript-eslint/no-unused-vars': [
