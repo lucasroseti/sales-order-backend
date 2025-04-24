@@ -1,4 +1,4 @@
-using { sales } from '../db/schema.cds';
+using { sales } from '../../db/schema.cds';
 
 @requires: 'authenticated-user'
 service MainService {
