@@ -18,4 +18,10 @@ export class ProductRepositoryImpl implements ProductRepository {
             stock: product.stock as number,
         }));
     }
+
+    public async updateStock(product: ProductModel): Promise<void> {
+        await cds.update('sales.Products').where({ id: product.id }).set({
+            stock: product.stock,
+        });
+    }
 }
