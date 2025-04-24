@@ -1,8 +1,9 @@
-import cds, { Request, Service } from '@sap/cds';
-import { Customers, Product, Products, SalesOrderHeaders, SalesOrderItem, SalesOrderItems } from '@models/sales';
+import { Request, Service } from '@sap/cds';
+
+import { FullRequestParams } from './protocols';
 import { customerController } from './factories/controllers/customer';
 import { salesOrderHeaderController } from './factories/controllers/sales-order-header';
-import { FullRequestParams } from './protocols';
+import { Customers, SalesOrderHeaders } from '@models/sales';
 
 export default (service: Service) => {
     service.before('READ', '*', async (request: Request) => {
@@ -26,6 +27,6 @@ export default (service: Service) => {
         request.data.totalAmount = result.totalAmount;
     });
     service.after('CREATE', 'SalesOrderHeaders', async (salesOrderHeaders: SalesOrderHeaders, request: Request) => {
-       await salesOrderHeaderController.afterCreate(salesOrderHeaders, request.user);
+        await salesOrderHeaderController.afterCreate(salesOrderHeaders, request.user);
     });
-}
+};

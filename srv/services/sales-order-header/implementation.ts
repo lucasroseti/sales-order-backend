@@ -1,16 +1,17 @@
 import { User } from '@sap/cds';
 
-import { SalesOrderHeader, SalesOrderHeaders, SalesOrderItem } from '@models/sales';
-import { CreationPayloadValidationResult, SalesOrderHeaderService } from './protocols';
-import { SalesOrderHeaderModel } from 'srv/models/sales-order-header';
-import { ProductRepository } from 'srv/repositories/product/protocols';
-import { SalesOrderItemModel } from 'srv/models/sales-order-item';
-import { CustomerRepository } from 'srv/repositories/customer/protocols';
-import { ProductModel } from 'srv/models/product';
 import { CustomerModel } from 'srv/models/customer';
+import { CustomerRepository } from 'srv/repositories/customer/protocols';
+import { LoggedUserModel } from 'srv/models/logged-user';
+import { ProductModel } from 'srv/models/product';
+import { ProductRepository } from 'srv/repositories/product/protocols';
+import { SalesOrderHeaderModel } from 'srv/models/sales-order-header';
+import { SalesOrderItemModel } from 'srv/models/sales-order-item';
 import { SalesOrderLogModel } from 'srv/models/sales-order-log';
 import { SalesOrderLogRepository } from 'srv/repositories/sales-order-log/protocols';
-import { LoggedUserModel } from 'srv/models/logged-user';
+
+import { CreationPayloadValidationResult, SalesOrderHeaderService } from './protocols';
+import { SalesOrderHeader, SalesOrderHeaders, SalesOrderItem } from '@models/sales';
 
 export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
     constructor(
@@ -38,7 +39,7 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
         return {
             hasError: false,
             totalAmount: header.calculateDiscount()
-        }
+        };
     }
 
     public async afterCreate(params: SalesOrderHeaders, loggedUser: User): Promise<void> {
