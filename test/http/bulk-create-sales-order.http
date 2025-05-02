@@ -1,0 +1,48 @@
+@localhost=localhost:4004/odata/v4/main/
+@id=3ac177dc-a55c-424c-8c4b-cfcf6fe9cfd5
+@customerId=48678748-1c02-4712-9cf3-808ccae903c8
+# produto sem estoque
+@productId1=26013947-e95b-48b3-a5bb-1ef81ebdbaca
+@productId2=26013947-e95b-48b3-a5bb-1ef81ebdbaca
+
+POST http://{{localhost}}/bulkCreateSalesOrder
+Content-Type: application/json
+Authorization: Basic cuka:Inicial@12345
+
+{
+    "payload": [
+        {
+            "id": "{{id}}",
+            "customer_id": "{{customerId}}",
+            "items": [
+                {
+                    "id": "efd4dd0a-990b-404b-b49c-a256e420b3cf",
+                    "header_id": "{{id}}",
+                    "product_id": "{{productId1}}",
+                    "quantity": 10,
+                    "price": 2.99
+                },
+                {
+                    "id": "38d842f1-c347-4684-8ea2-080f6c235eba",
+                    "header_id": "{{id}}",
+                    "product_id": "{{productId2}}",
+                    "quantity": 5,
+                    "price": 1.99
+                }
+            ]
+        },
+        {
+            "id": "{{id}}",
+            "customer_id": "{{customerId}}",
+            "items": [
+                {
+                    "id": "efd4dd0a-990b-404b-b49c-a256e420b3cf",
+                    "header_id": "{{id}}",
+                    "product_id": "{{productId1}}",
+                    "quantity": 100,
+                    "price": 2.99
+                }
+            ]
+        }
+    ]
+}
