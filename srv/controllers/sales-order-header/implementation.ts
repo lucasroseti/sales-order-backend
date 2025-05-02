@@ -1,5 +1,6 @@
 import { User } from '@sap/cds';
 
+import { Payload as BulkCreateSalesOrderPayload } from '@models/db/types/BulkCreateSalesOrder';
 import { SalesOrderHeader, SalesOrderHeaders } from '@models/sales';
 
 import { SalesOrderHeaderService } from '@/services/sales-order-header/protocols';
@@ -17,5 +18,12 @@ export class SalesOrderHeaderControllerImpl implements SalesOrderHeaderControlle
 
     public async afterCreate(params: SalesOrderHeaders, loggedUser: User): Promise<void> {
         return this.service.afterCreate(params, loggedUser);
+    }
+
+    public async bulkCreate(
+        params: BulkCreateSalesOrderPayload[],
+        loggedUser: User
+    ): Promise<CreationPayloadValidationResult> {
+        return this.service.bulkCreate(params, loggedUser);
     }
 }
