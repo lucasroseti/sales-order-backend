@@ -71,13 +71,11 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
         await this.salesOrderLogRepository.create(logs);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     public async bulkCreate(
         headers: BulkCreateSalesOrderPayload[],
         loggedUser: User
     ): Promise<CreationPayloadValidationResult> {
         const bulkCreateHeaders: SalesOrderHeaderModel[] = [];
-
         for (const headerObject of headers) {
             const productValidation = await this.validateProductsOnCreation(headerObject);
             if (productValidation.hasError) {
@@ -97,11 +95,16 @@ export class SalesOrderHeaderServiceImpl implements SalesOrderHeaderService {
             }
             bulkCreateHeaders.push(header);
         }
-
         await this.salesOrderHeaderRepository.bulkCreate(bulkCreateHeaders);
         await this.afterCreate(headers, loggedUser);
+        return this.serializeBulkCreateResult(bulkCreateHeaders);
+    }
 
-        return { hasError: false };
+    private serializeBulkCreateResult(headers: SalesOrderHeaderModel[]): CreationPayloadValidationResult {
+        return {
+            hasError: false,
+            headers: headers.map((header) => header.toCreationObject())
+        };
     }
 
     private async validateProductsOnCreation(
