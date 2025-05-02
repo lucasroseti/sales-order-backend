@@ -1,5 +1,5 @@
 using { sales } from '../../db/schema.cds';
-using { db.types.SalesReport } from '../../db/types';
+using { db.types.SalesReport, db.types.BulkCreateSalesOrder } from '../../db/types';
 
 @requires: 'authenticated-user'
 // Entities
@@ -15,4 +15,9 @@ service MainService {
 // Functions
 extend service MainService with {
     function getSalesReportByDays(days: SalesReport.Params:days) returns array of SalesReport.ExpectedResult;
+}
+
+// Actions
+extend service MainService with {
+    action bulkCreateSalesOrder(payload: array of BulkCreateSalesOrder.Payload) returns array of BulkCreateSalesOrder.ExpectedResult;
 }
