@@ -108,3 +108,9 @@ Authorization: Basic joaozinho:Inicial@12345
 
 ###
 
+# Funcionalidade de clonar pedido
+POST http://{{localhost}}/SalesOrderHeaders(1613865f-8d05-4f4a-9b33-0fb45aa47ad7)/cloneSalesOrder
+Content-Type: application/json
+Authorization: Basic joaozinho:Inicial@12345
+
+{}
