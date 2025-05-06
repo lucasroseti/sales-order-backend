@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@sap/cds": "^8",
+    "@sap/cds": "^8.9.2",
     "express": "^4",
     "module-alias": "^2.2.3"
   },
@@ -15,6 +15,7 @@
     "@cap-js/cds-types": "^0.10.0",
     "@cap-js/sqlite": "^1",
     "@eslint/js": "^9.25.1",
+    "@sap/cds-dk": "^8.9.3",
     "@types/axios": "^0.14.4",
     "@types/module-alias": "^2.0.4",
     "@types/node": "^22.14.1",
