@@ -5,8 +5,8 @@
       "type": "node",
       "request": "launch",
       "name": "Debug app SalesOrder",
-      "runtimeExecutable": "yarn",
-      "runtimeArgs": ["dev"],
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["cds-tsx", "watch"],
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "development",
