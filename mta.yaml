@@ -55,6 +55,9 @@ modules:
       disk-quota: 256M
       memory: 256M
     build-parameters:
+      builder: custom
+      commands:
+        - yarn
       ignore:
         - node_modules
     requires:
