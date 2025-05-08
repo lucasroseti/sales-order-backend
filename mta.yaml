@@ -73,7 +73,7 @@ resources:
   - name: sales-order-backend-db
     type: com.sap.xs.hdi-container
     parameters:
-      service: hana-trial
+      service: hana
       service-plan: hdi-shared
       config:
         schema: SALESORDERDB
