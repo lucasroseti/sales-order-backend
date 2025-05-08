@@ -1,0 +1,23 @@
+### Obter token do BTP (Oauth 2 client credentials)
+@authApiBaseUrl=df17dd2btrial.authentication.us10.hana.ondemand.com
+@apiBaseUrl=df17dd2btrial-dev-sales-order-backend-service.cfapps.us10-001.hana.ondemand.com
+
+POST https://{{authApiBaseUrl}}/oauth/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic 
+
+grant_type=password&username=&password=
+
+#
+
+### Criar produto na Sales Order API
+
+POST https://{{apiBaseUrl}}/sales-order/Products
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+    "name": "Kit Teclado e Mouse Sem Fio Multi Com Conexão USB - TC212",
+    "price": 99.90,
+    "stock": 500
+}
