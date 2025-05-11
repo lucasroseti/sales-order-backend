@@ -1,5 +1,5 @@
 /* eslint-disable max-lines-per-function */
-import { api } from '../config/api';
+import { api } from '@tests/e2e/config/api';
 
 describe('Customers routes', () => {
     describe('afterRead Customers', () => {
