@@ -1,7 +1,7 @@
 import { Either } from '@sweet-monads/either';
 
 import { AbstractError } from '@/errors';
-import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReportByDays';
+import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReport';
 
 export interface SalesReportService {
     findByDays(days?: number): Promise<Either<AbstractError, SalesReportByDays[]>>;

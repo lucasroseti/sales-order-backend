@@ -1,6 +1,6 @@
 import { Either, left, right } from '@sweet-monads/either';
 
-import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReportByDays';
+import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReport';
 
 import { SalesReportRepository } from '@/repositories/sales-report/protocols';
 import { SalesReportService } from '@/services/sales-report/protocols';
