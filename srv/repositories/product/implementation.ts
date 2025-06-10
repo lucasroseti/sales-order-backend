@@ -7,7 +7,7 @@ import { ProductModel, ProductProps } from '@/models/product';
 
 export class ProductRepositoryImpl implements ProductRepository {
     public async findByIds(ids: ProductProps['id'][]): Promise<ProductModel[] | null> {
-        const productQuery = SELECT.from('sales.Products').where({ id: ids });
+        const productQuery = cds.ql.SELECT.from('sales.Products').where({ id: ids });
         const products: Products = await cds.run(productQuery);
         if (products.length === 0) {
             return null;

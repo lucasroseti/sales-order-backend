@@ -1,6 +1,6 @@
 import cds from '@sap/cds';
 
-import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReportByDays';
+import { ExpectedResult as SalesReportByDays } from '@models/db/types/SalesReport';
 
 import { SalesReportModel } from '@/models/sales-report';
 import { SalesReportRepository } from '@/repositories/sales-report/protocols';
@@ -26,7 +26,7 @@ export class SalesReportRepositoryImpl implements SalesReportRepository {
     }
 
     private getReportBaseSql(): cds.ql.SELECT<unknown, unknown> {
-        return SELECT.from('sales.SalesOrderHeaders').columns(
+        return cds.ql.SELECT.from('sales.SalesOrderHeaders').columns(
             'id as salesOrderId',
             'totalAmount as salesOrderTotalAmount',
             'customer.id as customerId',

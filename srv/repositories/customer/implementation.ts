@@ -5,7 +5,7 @@ import { CustomerModel, CustomerProps } from '@/models/customer';
 
 export class CustomerRepositoryImpl implements CustomerRepository {
     public async findById(id: CustomerProps['id']): Promise<CustomerModel | null> {
-        const customerQuery = SELECT.one.from('sales.Customers').where({ id });
+        const customerQuery = cds.ql.SELECT.one.from('sales.Customers').where({ id });
         const dbCustomer = await cds.run(customerQuery);
         if (!dbCustomer) {
             return null;

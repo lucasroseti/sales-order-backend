@@ -12,7 +12,7 @@ export class SalesOrderHeaderRepositoryImpl implements SalesOrderHeaderRepositor
     }
 
     public async findCompleteSalesOrderById(id: string): Promise<SalesOrderHeaderModel | null> {
-        const sql = SELECT.from('sales.SalesOrderHeaders')
+        const sql = cds.ql.SELECT.from('sales.SalesOrderHeaders')
             .columns(
                 'totalAmount',
                 'customer.id as customerId',
