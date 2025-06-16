@@ -1,0 +1,121 @@
+name: Update Version on Release Branch
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  pull_request:
+    branches:
+      - 'release/**'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Extract version from branch name
+        id: extract-version
+        run: |
+          # Extrai a versão do nome da branch (release/1.0.2 -> 1.0.2)
+          BRANCH_NAME="${{ github.ref_name }}"
+          echo "Branch name: $BRANCH_NAME"
+          
+          if [[ $BRANCH_NAME =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "Extracted version: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Branch name does not match release pattern"
+            exit 1
+          fi
+
+      - name: Update package.json version
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          echo "Updating package.json to version: $VERSION"
+          
+          # Usa jq para atualizar a versão no package.json
+          jq --arg version "$VERSION" '.version = $version' package.json > package.json.tmp
+          mv package.json.tmp package.json
+          
+          # Verifica se a versão foi atualizada corretamente
+          UPDATED_VERSION=$(jq -r '.version' package.json)
+          echo "package.json version updated to: $UPDATED_VERSION"
+
+      - name: Update mta.yaml version
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          echo "Updating mta.yaml to version: $VERSION"
+          
+          # Usa sed para atualizar a versão no mta.yaml
+          sed -i "s/^version: .*/version: $VERSION/" mta.yaml
+          
+          # Verifica se a versão foi atualizada corretamente
+          UPDATED_VERSION=$(grep "^version:" mta.yaml | cut -d' ' -f2)
+          echo "mta.yaml version updated to: $UPDATED_VERSION"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          
+          # Configura o git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Adiciona e comita as mudanças
+          git add package.json mta.yaml
+          git commit -m "chore: update version to $VERSION"
+          
+          # Faz push das mudanças
+          git push
+
+      - name: Create version tag
+        if: steps.changes.outputs.has_changes == 'true' && github.event_name == 'push'
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          
+          # Cria uma tag para a versão
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+          
+          echo "Created and pushed tag: v$VERSION"
+
+      - name: Summary
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          echo "## Version Update Summary 📦" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "- **Files Updated**: package.json, mta.yaml" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
+            echo "- **Status**: ✅ Version updated successfully" >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ github.event_name }}" == "push" ]]; then
+              echo "- **Tag Created**: v$VERSION" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- **Status**: ℹ️ Version already up to date" >> $GITHUB_STEP_SUMMARY
+          fi 
