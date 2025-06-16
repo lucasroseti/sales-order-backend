@@ -52,6 +52,31 @@ jobs:
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current version in package.json: $CURRENT_VERSION"
 
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          echo "Building project for version $VERSION"
+          yarn clean
+          yarn build
+          
+          # Verifica se o arquivo .mtar foi criado
+          if [ -f "mta_archives/sales-order-backend.mtar" ]; then
+            echo "Build successful! MTAR file created."
+            
+            # Renomeia o arquivo para incluir a versão
+            mv "mta_archives/sales-order-backend.mtar" "mta_archives/sales-order-backend-v$VERSION.mtar"
+            echo "Renamed to sales-order-backend-v$VERSION.mtar"
+            
+            # Salva o caminho do arquivo para uso posterior
+            echo "MTAR_FILE=mta_archives/sales-order-backend-v$VERSION.mtar" >> $GITHUB_ENV
+          else
+            echo "Error: MTAR file not found after build"
+            exit 1
+          fi
+
       - name: Create tag
         run: |
           VERSION="${{ steps.extract-version.outputs.version }}"
@@ -152,6 +177,12 @@ jobs:
             
             ${{ github.event.pull_request.body }}
             
+            ## 📦 Assets
+            
+            - `sales-order-backend-v${{ steps.extract-version.outputs.version }}.mtar` - Deployable MTAR file for SAP BTP
+            
             [🔎 See PR](${{ github.event.pull_request.html_url }})
+          files: |
+            ${{ env.MTAR_FILE }}
           draft: false
           prerelease: false 
