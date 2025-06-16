@@ -96,30 +96,3 @@ jobs:
           
           # Faz push das mudanças
           git push
-
-      - name: Create version tag
-        if: steps.changes.outputs.has_changes == 'true' && github.event_name == 'push'
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          
-          # Cria uma tag para a versão
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
-          
-          echo "Created and pushed tag: v$VERSION"
-
-      - name: Summary
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          echo "## Version Update Summary 📦" >> $GITHUB_STEP_SUMMARY
-          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version**: $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "- **Files Updated**: package.json, mta.yaml" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.changes.outputs.has_changes }}" == "true" ]]; then
-            echo "- **Status**: ✅ Version updated successfully" >> $GITHUB_STEP_SUMMARY
-            if [[ "${{ github.event_name }}" == "push" ]]; then
-              echo "- **Tag Created**: v$VERSION" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "- **Status**: ℹ️ Version already up to date" >> $GITHUB_STEP_SUMMARY
-          fi 
