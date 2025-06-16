@@ -1,6 +1,6 @@
 _schema-version: 3.3.0
 ID: sales-order-backend
-version: 1.0.0
+version: 1.0.2
 description: Sales Order Management Backend App
 
 parameters:
@@ -19,7 +19,7 @@ modules:
     path: gen/srv
     parameters:
       buildpack: nodejs_buildpack
-      disk-quota: 256M
+      disk-quota: 1G
       memory: 512M
     build-parameters:
       builder: custom
@@ -36,6 +36,7 @@ modules:
     requires:
       - name: sales-order-backend-db
       - name: sales-order-backend-uaa
+      - name: dynatrace-service
 
   - name: sales-order-backend-db-deployer
     type: hdb
@@ -52,7 +53,7 @@ modules:
     type: approuter.nodejs
     path: app-router
     parameters:
-      disk-quota: 256M
+      disk-quota: 1G
       memory: 256M
     build-parameters:
       builder: custom
@@ -61,6 +62,7 @@ modules:
       ignore:
         - node_modules
     requires:
+      - name: dynatrace-service
       - name: sales-order-backend-uaa
       - name: srv-api
         group: destinations
