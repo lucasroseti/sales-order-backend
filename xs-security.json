@@ -65,5 +65,8 @@
         "redirect-uris": [
             "https://df17dd2btrial-*/**"
         ]
-    }
+    },
+    "source": "^/metrics$",
+    "target": "/metrics",
+    "authenticationType": "none"
 }
