@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard de Métricas - Sales Order Backend</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+    .container { max-width: 1100px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h1 { color: #2c3e50; }
+    h2 { color: #2980b9; margin-top: 32px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 8px 12px; border-bottom: 1px solid #eee; text-align: left; }
+    th { background: #f0f6fa; }
+    .stat { font-size: 2em; color: #27ae60; }
+    .error { color: #c0392b; }
+    .footer { margin-top: 40px; color: #888; font-size: 0.9em; text-align: center; }
+    .charts { display: flex; flex-wrap: wrap; gap: 32px; margin-top: 32px; }
+    .chart-container { flex: 1 1 400px; min-width: 350px; background: #fafbfc; border-radius: 8px; padding: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard de Métricas</h1>
+    <div>
+      <strong>Pedidos Criados:</strong>
+      <span id="salesOrderCreated" class="stat">...</span>
+    </div>
+    <div>
+      <strong>Total de Erros HTTP:</strong>
+      <span id="httpErrors" class="stat error">...</span>
+    </div>
+    <div class="charts">
+      <div class="chart-container">
+        <h2>Pedidos Criados ao Longo do Tempo</h2>
+        <canvas id="salesOrderChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h2>Erros HTTP ao Longo do Tempo</h2>
+        <canvas id="errorChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h2>Tempo de Resposta (p95) por Rota</h2>
+        <canvas id="durationChart"></canvas>
+      </div>
+    </div>
+    <h2>Requisições HTTP por Rota</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rota</th>
+          <th>Método</th>
+          <th>Status</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="httpRequestsTable">
+        <tr><td colspan="4">Carregando...</td></tr>
+      </tbody>
+    </table>
+    <h2>Tempo de Resposta (Histograma)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Rota</th>
+          <th>Método</th>
+          <th>Status</th>
+          <th>Bucket (s)</th>
+          <th>Requisições</th>
+        </tr>
+      </thead>
+      <tbody id="httpDurationTable">
+        <tr><td colspan="5">Carregando...</td></tr>
+      </tbody>
+    </table>
+    <div class="footer">
+      Atualizado em <span id="updatedAt"></span>
+    </div>
+  </div>
+  <script>
+    // Histórico para gráficos
+    const salesOrderHistory = [];
+    const errorHistory = [];
+    const durationHistory = {};
+    const maxPoints = 30; // pontos no gráfico
+
+    // Gráficos Chart.js
+    let salesOrderChart, errorChart, durationChart;
+
+    function createCharts() {
+      const ctx1 = document.getElementById('salesOrderChart').getContext('2d');
+      salesOrderChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Pedidos Criados',
+            data: [],
+            borderColor: '#27ae60',
+            backgroundColor: 'rgba(39,174,96,0.1)',
+            fill: true,
+            tension: 0.2
+          }]
+        },
+        options: { scales: { x: { display: false } } }
+      });
+
+      const ctx2 = document.getElementById('errorChart').getContext('2d');
+      errorChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Erros HTTP',
+            data: [],
+            borderColor: '#c0392b',
+            backgroundColor: 'rgba(192,57,43,0.1)',
+            fill: true,
+            tension: 0.2
+          }]
+        },
+        options: { scales: { x: { display: false } } }
+      });
+
+      const ctx3 = document.getElementById('durationChart').getContext('2d');
+      durationChart = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'p95 (s)',
+            data: [],
+            backgroundColor: '#2980b9'
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { x: { title: { display: true, text: 'Rota' } }, y: { title: { display: true, text: 'Segundos' } } }
+        }
+      });
+    }
+
+    async function fetchMetrics() {
+      const res = await fetch('https://df17dd2btrial-dev-sales-order-backend-service.cfapps.us10-001.hana.ondemand.com/metrics');
+      return await res.text();
+    }
+
+    function parsePrometheusMetrics(text) {
+      const lines = text.split('\n');
+      const metrics = {};
+      for (const line of lines) {
+        if (line.startsWith('#') || !line.trim()) continue;
+        const [metricWithLabels, value] = line.split(/\s+/);
+        const metric = metricWithLabels.split('{')[0];
+        if (!metrics[metric]) metrics[metric] = [];
+        metrics[metric].push({ raw: line, value: parseFloat(value), metric: metricWithLabels });
+      }
+      return metrics;
+    }
+
+    function updateDashboard(metrics) {
+      console.log(metrics)
+
+      // Pedidos criados
+      const salesOrder = metrics['sales_order_created_total'];
+      const salesOrderValue = salesOrder ? salesOrder[0].value : 0;
+      document.getElementById('salesOrderCreated').textContent = salesOrderValue;
+
+      // Erros HTTP
+      const httpErrors = metrics['http_error_total'] || [];
+      const totalErrors = httpErrors.reduce((sum, m) => sum + m.value, 0);
+      console.log(totalErrors)
+      document.getElementById('httpErrors').textContent = totalErrors;
+
+      // Histórico para gráficos
+      const now = new Date();
+      salesOrderHistory.push({ t: now, v: salesOrderValue });
+      errorHistory.push({ t: now, v: totalErrors });
+      if (salesOrderHistory.length > maxPoints) salesOrderHistory.shift();
+      if (errorHistory.length > maxPoints) errorHistory.shift();
+
+      // Atualiza gráfico de pedidos criados
+      salesOrderChart.data.labels = salesOrderHistory.map(x => x.t.toLocaleTimeString());
+      salesOrderChart.data.datasets[0].data = salesOrderHistory.map(x => x.v);
+      salesOrderChart.update();
+
+      // Atualiza gráfico de erros
+      errorChart.data.labels = errorHistory.map(x => x.t.toLocaleTimeString());
+      errorChart.data.datasets[0].data = errorHistory.map(x => x.v);
+      errorChart.update();
+
+      // Tempo de resposta p95 por rota
+      // Calcula p95 usando buckets do histograma
+      const buckets = metrics['http_request_duration_seconds_bucket'] || [];
+      const sumByRoute = {};
+      const countByRoute = {};
+      for (const m of buckets) {
+        const match = m.raw.match(/http_request_duration_seconds_bucket\{([^}]+)\}/);
+        if (!match) continue;
+        const labels = Object.fromEntries(match[1].split(',').map(s => s.split('=')).map(([k,v]) => [k, v.replace(/"/g, '')]));
+        const route = labels.route || '-';
+        const le = parseFloat(labels.le);
+        if (!sumByRoute[route]) sumByRoute[route] = [];
+        sumByRoute[route].push({ le, value: m.value });
+      }
+      // Calcula p95 para cada rota
+      const p95ByRoute = {};
+      for (const route in sumByRoute) {
+        const arr = sumByRoute[route].sort((a, b) => a.le - b.le);
+        let total = arr[arr.length - 1]?.value || 0;
+        let p95 = 0;
+        for (const b of arr) {
+          if (b.value >= total * 0.95) {
+            p95 = b.le;
+            break;
+          }
+        }
+        p95ByRoute[route] = p95;
+      }
+      // Atualiza gráfico de p95
+      durationChart.data.labels = Object.keys(p95ByRoute);
+      durationChart.data.datasets[0].data = Object.values(p95ByRoute);
+      durationChart.update();
+
+      // Requisições HTTP por rota
+      const httpReqs = metrics['http_requests_total'] || [];
+      const table = document.getElementById('httpRequestsTable');
+      table.innerHTML = '';
+      if (httpReqs.length === 0) {
+        table.innerHTML = '<tr><td colspan="4">Nenhum dado</td></tr>';
+      } else {
+        for (const m of httpReqs) {
+          const match = m.raw.match(/http_requests_total\{([^}]+)\}/);
+          let route = '-', method = '-', status = '-';
+          if (match) {
+            const labels = Object.fromEntries(match[1].split(',').map(s => s.split('=')).map(([k,v]) => [k, v.replace(/"/g, '')]));
+            route = labels.route || '-';
+            method = labels.method || '-';
+            status = labels.status_code || '-';
+          }
+          table.innerHTML += `<tr>
+            <td>${route}</td>
+            <td>${method}</td>
+            <td>${status}</td>
+            <td>${m.value}</td>
+          </tr>`;
+        }
+      }
+
+      // Tempo de resposta (histograma)
+      const httpDur = metrics['http_request_duration_seconds_bucket'] || [];
+      console.log(httpDur)
+      const durTable = document.getElementById('httpDurationTable');
+      durTable.innerHTML = '';
+      if (httpDur.length === 0) {
+        durTable.innerHTML = '<tr><td colspan="5">Nenhum dado</td></tr>';
+      } else {
+        for (const m of httpDur) {
+          const match = m.raw.match(/http_request_duration_seconds_bucket\{([^}]+)\}/);
+          let route = '-', method = '-', status = '-', le = '-';
+          if (match) {
+            const labels = Object.fromEntries(match[1].split(',').map(s => s.split('=')).map(([k,v]) => [k, v.replace(/"/g, '')]));
+            route = labels.route || '-';
+            method = labels.method || '-';
+            status = labels.status_code || '-';
+            le = labels.le || '-';
+          }
+          durTable.innerHTML += `<tr>
+            <td>${route}</td>
+            <td>${method}</td>
+            <td>${status}</td>
+            <td>${le}</td>
+            <td>${m.value}</td>
+          </tr>`;
+        }
+      }
+
+      document.getElementById('updatedAt').textContent = now.toLocaleString('pt-BR');
+    }
+
+    async function refresh() {
+      try {
+        const text = await fetchMetrics();
+        const metrics = parsePrometheusMetrics(text);
+        updateDashboard(metrics);
+      } catch (e) {
+        document.getElementById('salesOrderCreated').textContent = 'Erro';
+        document.getElementById('httpErrors').textContent = 'Erro';
+        document.getElementById('httpRequestsTable').innerHTML = '<tr><td colspan="4">Erro ao carregar</td></tr>';
+        document.getElementById('httpDurationTable').innerHTML = '<tr><td colspan="5">Erro ao carregar</td></tr>';
+      }
+    }
+
+    createCharts();
+    refresh();
+    setInterval(refresh, 10000); // Atualiza a cada 10s
+  </script>
+</body>
+</html> 
