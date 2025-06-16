@@ -1,0 +1,20 @@
+groups:
+  - name: sales-order-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: sum(http_error_total) > 0
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta taxa de erros HTTP"
+          description: "Mais de 5 erros HTTP por minuto nos últimos 5 minutos."
+
+      - alert: ServiceDown
+        expr: up{job="sales-order-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Serviço fora do ar"
+          description: "O serviço sales-order-backend está indisponível há 1 minuto."
