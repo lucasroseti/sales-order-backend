@@ -2,6 +2,12 @@
     "authenticationMethod": "route",
     "routes": [
         {
+            "source": "^/metrics$",
+            "destination": "srv-api",
+            "csrfProtection": false,
+            "authenticationType": "none"
+        },
+        {
             "source": "^/sales-order/(.*)",
             "destination": "srv-api",
             "csrfProtection": true,
