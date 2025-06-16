@@ -1,0 +1,151 @@
+name: Release on Main PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Extract version from branch name
+        id: extract-version
+        run: |
+          # Extrai a versão do nome da branch (release/1.0.2 -> 1.0.2)
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "Branch name: $BRANCH_NAME"
+          
+          if [[ $BRANCH_NAME =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "Extracted version: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Branch name does not match release pattern"
+            exit 1
+          fi
+
+      - name: Get current version from package.json
+        id: current-version
+        run: |
+          CURRENT_VERSION=$(jq -r '.version' package.json)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version in package.json: $CURRENT_VERSION"
+
+      - name: Create tag
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          
+          # Configura o git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Verifica se a tag já existe
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists"
+          else
+            # Cria a tag
+            git tag -a "v$VERSION" -m "Release version $VERSION"
+            git push origin "v$VERSION"
+            echo "Created and pushed tag v$VERSION"
+          fi
+
+      - name: Create or update Changelog
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_BODY="${{ github.event.pull_request.body }}"
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          CURRENT_DATE=$(date +"%Y-%m-%d")
+          
+          # Cria o conteúdo da nova versão
+          NEW_ENTRY="# $VERSION
+
+This release includes:
+
+$PR_BODY
+
+[🔎 See PR]($PR_URL)
+
+---
+
+"
+          
+          # Se o arquivo Changelog.md não existir, cria um novo
+          if [ ! -f "Changelog.md" ]; then
+            echo "# Changelog
+
+All notable changes to this project will be documented in this file.
+
+$NEW_ENTRY" > Changelog.md
+          else
+            # Se existir, adiciona a nova entrada no topo (após o cabeçalho)
+            # Cria um arquivo temporário com a nova entrada
+            echo "# Changelog
+
+All notable changes to this project will be documented in this file.
+
+$NEW_ENTRY" > temp_changelog.md
+            
+            # Adiciona o conteúdo existente (exceto as primeiras 3 linhas do cabeçalho)
+            tail -n +4 Changelog.md >> temp_changelog.md 2>/dev/null || true
+            
+            # Substitui o arquivo original
+            mv temp_changelog.md Changelog.md
+          fi
+          
+          echo "Changelog updated successfully"
+
+      - name: Commit changelog changes
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          
+          # Configura o git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Verifica se há mudanças no changelog
+          if git diff --quiet Changelog.md; then
+            echo "No changes to Changelog.md"
+          else
+            # Adiciona e comita as mudanças
+            git add Changelog.md
+            git commit -m "docs: update changelog for version $VERSION"
+            git push
+            echo "Changelog committed and pushed"
+          fi
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.extract-version.outputs.version }}
+          release_name: Release v${{ steps.extract-version.outputs.version }}
+          body: |
+            ${{ github.event.pull_request.body }}
+            
+            [🔎 See PR](${{ github.event.pull_request.html_url }})
+          draft: false
+          prerelease: false 
