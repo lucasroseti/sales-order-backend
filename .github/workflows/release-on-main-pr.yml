@@ -81,78 +81,78 @@ jobs:
           # Escape do conteúdo da PR para uso seguro em bash
           PR_BODY=$(cat << 'EOF' ${{ github.event.pull_request.body }} EOF)
           
-#           # Salva o PR body em um arquivo temporário para evitar problemas com caracteres especiais
-#           echo "$PR_BODY" > pr_body.tmp
+          # Salva o PR body em um arquivo temporário para evitar problemas com caracteres especiais
+          echo "$PR_BODY" > pr_body.tmp
           
-#           # Se o arquivo Changelog.md não existir, cria um novo
-#           if [ ! -f "Changelog.md" ]; then
-#             echo "# Changelog" > Changelog.md
-#             echo "" >> Changelog.md
-#             echo "All notable changes to this project will be documented in this file." >> Changelog.md
-#             echo "" >> Changelog.md
-#           fi
+          # Se o arquivo Changelog.md não existir, cria um novo
+          if [ ! -f "Changelog.md" ]; then
+            echo "# Changelog" > Changelog.md
+            echo "" >> Changelog.md
+            echo "All notable changes to this project will be documented in this file." >> Changelog.md
+            echo "" >> Changelog.md
+          fi
           
-#           # Cria um arquivo temporário com a nova entrada
-#           echo "# $VERSION" > new_entry.tmp
-#           echo "" >> new_entry.tmp
-#           echo "This release includes:" >> new_entry.tmp
-#           echo "" >> new_entry.tmp
-#           cat pr_body.tmp >> new_entry.tmp
-#           echo "" >> new_entry.tmp
-#           echo "[🔎 See PR]($PR_URL)" >> new_entry.tmp
-#           echo "" >> new_entry.tmp
-#           echo "---" >> new_entry.tmp
-#           echo "" >> new_entry.tmp
+          # Cria um arquivo temporário com a nova entrada
+          echo "# $VERSION" > new_entry.tmp
+          echo "" >> new_entry.tmp
+          echo "This release includes:" >> new_entry.tmp
+          echo "" >> new_entry.tmp
+          cat pr_body.tmp >> new_entry.tmp
+          echo "" >> new_entry.tmp
+          echo "[🔎 See PR]($PR_URL)" >> new_entry.tmp
+          echo "" >> new_entry.tmp
+          echo "---" >> new_entry.tmp
+          echo "" >> new_entry.tmp
           
-#           # Cria o novo changelog
-#           echo "# Changelog" > temp_changelog.md
-#           echo "" >> temp_changelog.md
-#           echo "All notable changes to this project will be documented in this file." >> temp_changelog.md
-#           echo "" >> temp_changelog.md
-#           cat new_entry.tmp >> temp_changelog.md
+          # Cria o novo changelog
+          echo "# Changelog" > temp_changelog.md
+          echo "" >> temp_changelog.md
+          echo "All notable changes to this project will be documented in this file." >> temp_changelog.md
+          echo "" >> temp_changelog.md
+          cat new_entry.tmp >> temp_changelog.md
           
-#           # Adiciona o conteúdo existente (pula as primeiras 4 linhas do cabeçalho)
-#           if [ -f "Changelog.md" ]; then
-#             tail -n +5 Changelog.md >> temp_changelog.md 2>/dev/null || true
-#           fi
+          # Adiciona o conteúdo existente (pula as primeiras 4 linhas do cabeçalho)
+          if [ -f "Changelog.md" ]; then
+            tail -n +5 Changelog.md >> temp_changelog.md 2>/dev/null || true
+          fi
           
-#           # Substitui o arquivo original
-#           mv temp_changelog.md Changelog.md
+          # Substitui o arquivo original
+          mv temp_changelog.md Changelog.md
           
-#           # Remove arquivos temporários
-#           rm -f pr_body.tmp new_entry.tmp
+          # Remove arquivos temporários
+          rm -f pr_body.tmp new_entry.tmp
           
-#           echo "Changelog updated successfully"
+          echo "Changelog updated successfully"
 
-#       - name: Commit changelog changes
-#         run: |
-#           VERSION="${{ steps.extract-version.outputs.version }}"
+      - name: Commit changelog changes
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
           
-#           # Configura o git
-#           git config --local user.email "action@github.com"
-#           git config --local user.name "GitHub Action"
+          # Configura o git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           
-#           # Verifica se há mudanças no changelog
-#           if git diff --quiet Changelog.md; then
-#             echo "No changes to Changelog.md"
-#           else
-#             # Adiciona e comita as mudanças
-#             git add Changelog.md
-#             git commit -m "docs: update changelog for version $VERSION"
-#             git push
-#             echo "Changelog committed and pushed"
-#           fi
+          # Verifica se há mudanças no changelog
+          if git diff --quiet Changelog.md; then
+            echo "No changes to Changelog.md"
+          else
+            # Adiciona e comita as mudanças
+            git add Changelog.md
+            git commit -m "docs: update changelog for version $VERSION"
+            git push
+            echo "Changelog committed and pushed"
+          fi
 
-#       - name: Create GitHub Release
-#         uses: softprops/action-gh-release@v1
-#         with:
-#           tag_name: v${{ steps.extract-version.outputs.version }}
-#           name: Release v${{ steps.extract-version.outputs.version }}
-#           body: |
-#             This release includes:
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.extract-version.outputs.version }}
+          name: Release v${{ steps.extract-version.outputs.version }}
+          body: |
+            This release includes:
             
-#             ${{ github.event.pull_request.body }}
+            ${{ github.event.pull_request.body }}
             
-#             [🔎 See PR](${{ github.event.pull_request.html_url }})
-#           draft: false
-#           prerelease: false 
+            [🔎 See PR](${{ github.event.pull_request.html_url }})
+          draft: false
+          prerelease: false 
