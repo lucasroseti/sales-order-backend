@@ -71,15 +71,14 @@ jobs:
           fi
 
       - name: Create or update Changelog
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           VERSION="${{ steps.extract-version.outputs.version }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
           PR_TITLE="${{ github.event.pull_request.title }}"
           PR_URL="${{ github.event.pull_request.html_url }}"
           CURRENT_DATE=$(date +"%Y-%m-%d")
-          
-          # Escape do conteúdo da PR para uso seguro em bash
-          PR_BODY=$(cat << 'EOF' ${{ github.event.pull_request.body }} EOF)
           
           # Salva o PR body em um arquivo temporário para evitar problemas com caracteres especiais
           echo "$PR_BODY" > pr_body.tmp
