@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+# 1.0.4
+
+This release includes:
+
+This release includes:
+
+Removed filter restrictions to show empty option
+
+PR https://github.com/lucasroseti/sales-order-backend/pull/1
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/3)
+
+---
+
 # 1.0.0
 
 This release includes:
