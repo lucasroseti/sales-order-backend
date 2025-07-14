@@ -1,0 +1,20 @@
+name: Gitflow CI
+
+on: 
+  pull_request_review:
+    types: [submitted]
+    branches: [main, quality]
+
+jobs:
+  build:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    name: GitFlow CI
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run git flow process
+        uses: lucasroseti/git-flow-action@main
+        with:
+          github_token: ${{ secrets.ADMIN_TOKEN }}
+          master_branch: 'main'
+          development_branch: 'quality'
