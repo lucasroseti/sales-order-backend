@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+# 1.0.6
+
+This release includes:
+
+- Test 1
+- Test 2
+
+PR https://github.com/lucasroseti/sales-order-backend/pull/1
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/5)
+
+---
+
+# 1.0.5
+
+This release includes:
+
+- Test 1
+- Test 2
+
+PR https://github.com/lucasroseti/sales-order-backend/pull/1
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/4)
+
+---
+
 # 1.0.4
 
 This release includes:
