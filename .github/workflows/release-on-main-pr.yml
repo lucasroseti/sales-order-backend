@@ -1,188 +1,188 @@
-name: Release on Main PR
+# name: Release on Main PR
 
-on:
-  pull_request:
-    branches:
-      - main
-    types: [closed]
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     types: [closed]
 
-permissions:
-  contents: write
-  pull-requests: read
-  issues: read
+# permissions:
+#   contents: write
+#   pull-requests: read
+#   issues: read
 
-jobs:
-  release:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
-    runs-on: ubuntu-latest
+# jobs:
+#   release:
+#     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+#     runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+#           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: 'yarn'
 
-      - name: Extract version from branch name
-        id: extract-version
-        run: |
-          # Extrai a versão do nome da branch (release/1.0.2 -> 1.0.2)
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          echo "Branch name: $BRANCH_NAME"
+#       - name: Extract version from branch name
+#         id: extract-version
+#         run: |
+#           # Extrai a versão do nome da branch (release/1.0.2 -> 1.0.2)
+#           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+#           echo "Branch name: $BRANCH_NAME"
           
-          if [[ $BRANCH_NAME =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            VERSION="${BASH_REMATCH[1]}"
-            echo "Extracted version: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-          else
-            echo "Branch name does not match release pattern"
-            exit 1
-          fi
+#           if [[ $BRANCH_NAME =~ ^release/([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+#             VERSION="${BASH_REMATCH[1]}"
+#             echo "Extracted version: $VERSION"
+#             echo "version=$VERSION" >> $GITHUB_OUTPUT
+#           else
+#             echo "Branch name does not match release pattern"
+#             exit 1
+#           fi
 
-      - name: Get current version from package.json
-        id: current-version
-        run: |
-          CURRENT_VERSION=$(jq -r '.version' package.json)
-          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version in package.json: $CURRENT_VERSION"
+#       - name: Get current version from package.json
+#         id: current-version
+#         run: |
+#           CURRENT_VERSION=$(jq -r '.version' package.json)
+#           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+#           echo "Current version in package.json: $CURRENT_VERSION"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+#       - name: Install dependencies
+#         run: yarn install --frozen-lockfile
 
-      - name: Build project
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          echo "Building project for version $VERSION"
-          yarn clean
-          yarn build
+#       - name: Build project
+#         run: |
+#           VERSION="${{ steps.extract-version.outputs.version }}"
+#           echo "Building project for version $VERSION"
+#           yarn clean
+#           yarn build
           
-          # Verifica se o arquivo .mtar foi criado
-          if [ -f "mta_archives/sales-order-backend.mtar" ]; then
-            echo "Build successful! MTAR file created."
+#           # Verifica se o arquivo .mtar foi criado
+#           if [ -f "mta_archives/sales-order-backend.mtar" ]; then
+#             echo "Build successful! MTAR file created."
             
-            # Renomeia o arquivo para incluir a versão
-            mv "mta_archives/sales-order-backend.mtar" "mta_archives/sales-order-backend-v$VERSION.mtar"
-            echo "Renamed to sales-order-backend-v$VERSION.mtar"
+#             # Renomeia o arquivo para incluir a versão
+#             mv "mta_archives/sales-order-backend.mtar" "mta_archives/sales-order-backend-v$VERSION.mtar"
+#             echo "Renamed to sales-order-backend-v$VERSION.mtar"
             
-            # Salva o caminho do arquivo para uso posterior
-            echo "MTAR_FILE=mta_archives/sales-order-backend-v$VERSION.mtar" >> $GITHUB_ENV
-          else
-            echo "Error: MTAR file not found after build"
-            exit 1
-          fi
+#             # Salva o caminho do arquivo para uso posterior
+#             echo "MTAR_FILE=mta_archives/sales-order-backend-v$VERSION.mtar" >> $GITHUB_ENV
+#           else
+#             echo "Error: MTAR file not found after build"
+#             exit 1
+#           fi
 
-      - name: Create tag
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
+#       - name: Create tag
+#         run: |
+#           VERSION="${{ steps.extract-version.outputs.version }}"
           
-          # Configura o git
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+#           # Configura o git
+#           git config --local user.email "action@github.com"
+#           git config --local user.name "GitHub Action"
           
-          # Verifica se a tag já existe
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists"
-          else
-            # Cria a tag
-            git tag -a "v$VERSION" -m "Release version $VERSION"
-            git push origin "v$VERSION"
-            echo "Created and pushed tag v$VERSION"
-          fi
+#           # Verifica se a tag já existe
+#           if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+#             echo "Tag v$VERSION already exists"
+#           else
+#             # Cria a tag
+#             git tag -a "v$VERSION" -m "Release version $VERSION"
+#             git push origin "v$VERSION"
+#             echo "Created and pushed tag v$VERSION"
+#           fi
 
-      - name: Create or update Changelog
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_URL="${{ github.event.pull_request.html_url }}"
-          CURRENT_DATE=$(date +"%Y-%m-%d")
+#       - name: Create or update Changelog
+#         env:
+#           PR_BODY: ${{ github.event.pull_request.body }}
+#         run: |
+#           VERSION="${{ steps.extract-version.outputs.version }}"
+#           PR_NUMBER="${{ github.event.pull_request.number }}"
+#           PR_TITLE="${{ github.event.pull_request.title }}"
+#           PR_URL="${{ github.event.pull_request.html_url }}"
+#           CURRENT_DATE=$(date +"%Y-%m-%d")
           
-          # Salva o PR body em um arquivo temporário para evitar problemas com caracteres especiais
-          echo "$PR_BODY" > pr_body.tmp
+#           # Salva o PR body em um arquivo temporário para evitar problemas com caracteres especiais
+#           echo "$PR_BODY" > pr_body.tmp
           
-          # Se o arquivo Changelog.md não existir, cria um novo
-          if [ ! -f "Changelog.md" ]; then
-            echo "# Changelog" > Changelog.md
-            echo "" >> Changelog.md
-            echo "All notable changes to this project will be documented in this file." >> Changelog.md
-            echo "" >> Changelog.md
-          fi
+#           # Se o arquivo Changelog.md não existir, cria um novo
+#           if [ ! -f "Changelog.md" ]; then
+#             echo "# Changelog" > Changelog.md
+#             echo "" >> Changelog.md
+#             echo "All notable changes to this project will be documented in this file." >> Changelog.md
+#             echo "" >> Changelog.md
+#           fi
           
-          # Cria um arquivo temporário com a nova entrada
-          echo "# $VERSION" > new_entry.tmp
-          echo "" >> new_entry.tmp
-          echo "This release includes:" >> new_entry.tmp
-          echo "" >> new_entry.tmp
-          cat pr_body.tmp >> new_entry.tmp
-          echo "" >> new_entry.tmp
-          echo "[🔎 See PR]($PR_URL)" >> new_entry.tmp
-          echo "" >> new_entry.tmp
-          echo "---" >> new_entry.tmp
-          echo "" >> new_entry.tmp
+#           # Cria um arquivo temporário com a nova entrada
+#           echo "# $VERSION" > new_entry.tmp
+#           echo "" >> new_entry.tmp
+#           echo "This release includes:" >> new_entry.tmp
+#           echo "" >> new_entry.tmp
+#           cat pr_body.tmp >> new_entry.tmp
+#           echo "" >> new_entry.tmp
+#           echo "[🔎 See PR]($PR_URL)" >> new_entry.tmp
+#           echo "" >> new_entry.tmp
+#           echo "---" >> new_entry.tmp
+#           echo "" >> new_entry.tmp
           
-          # Cria o novo changelog
-          echo "# Changelog" > temp_changelog.md
-          echo "" >> temp_changelog.md
-          echo "All notable changes to this project will be documented in this file." >> temp_changelog.md
-          echo "" >> temp_changelog.md
-          cat new_entry.tmp >> temp_changelog.md
+#           # Cria o novo changelog
+#           echo "# Changelog" > temp_changelog.md
+#           echo "" >> temp_changelog.md
+#           echo "All notable changes to this project will be documented in this file." >> temp_changelog.md
+#           echo "" >> temp_changelog.md
+#           cat new_entry.tmp >> temp_changelog.md
           
-          # Adiciona o conteúdo existente (pula as primeiras 4 linhas do cabeçalho)
-          if [ -f "Changelog.md" ]; then
-            tail -n +5 Changelog.md >> temp_changelog.md 2>/dev/null || true
-          fi
+#           # Adiciona o conteúdo existente (pula as primeiras 4 linhas do cabeçalho)
+#           if [ -f "Changelog.md" ]; then
+#             tail -n +5 Changelog.md >> temp_changelog.md 2>/dev/null || true
+#           fi
           
-          # Substitui o arquivo original
-          mv temp_changelog.md Changelog.md
+#           # Substitui o arquivo original
+#           mv temp_changelog.md Changelog.md
           
-          # Remove arquivos temporários
-          rm -f pr_body.tmp new_entry.tmp
+#           # Remove arquivos temporários
+#           rm -f pr_body.tmp new_entry.tmp
           
-          echo "Changelog updated successfully"
+#           echo "Changelog updated successfully"
 
-      - name: Commit changelog changes
-        run: |
-          VERSION="${{ steps.extract-version.outputs.version }}"
+#       - name: Commit changelog changes
+#         run: |
+#           VERSION="${{ steps.extract-version.outputs.version }}"
           
-          # Configura o git
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+#           # Configura o git
+#           git config --local user.email "action@github.com"
+#           git config --local user.name "GitHub Action"
           
-          # Verifica se há mudanças no changelog
-          if git diff --quiet Changelog.md; then
-            echo "No changes to Changelog.md"
-          else
-            # Adiciona e comita as mudanças
-            git add Changelog.md
-            git commit -m "docs: update changelog for version $VERSION"
-            git push
-            echo "Changelog committed and pushed"
-          fi
+#           # Verifica se há mudanças no changelog
+#           if git diff --quiet Changelog.md; then
+#             echo "No changes to Changelog.md"
+#           else
+#             # Adiciona e comita as mudanças
+#             git add Changelog.md
+#             git commit -m "docs: update changelog for version $VERSION"
+#             git push
+#             echo "Changelog committed and pushed"
+#           fi
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.extract-version.outputs.version }}
-          name: Release v${{ steps.extract-version.outputs.version }}
-          body: |
-            This release includes:
+#       - name: Create GitHub Release
+#         uses: softprops/action-gh-release@v1
+#         with:
+#           tag_name: v${{ steps.extract-version.outputs.version }}
+#           name: Release v${{ steps.extract-version.outputs.version }}
+#           body: |
+#             This release includes:
             
-            ${{ github.event.pull_request.body }}
+#             ${{ github.event.pull_request.body }}
             
-            ## 📦 Assets
+#             ## 📦 Assets
             
-            - `sales-order-backend-v${{ steps.extract-version.outputs.version }}.mtar` - Deployable MTAR file for SAP BTP
+#             - `sales-order-backend-v${{ steps.extract-version.outputs.version }}.mtar` - Deployable MTAR file for SAP BTP
             
-            [🔎 See PR](${{ github.event.pull_request.html_url }})
-          files: |
-            ${{ env.MTAR_FILE }}
-          draft: false
-          prerelease: false 
+#             [🔎 See PR](${{ github.event.pull_request.html_url }})
+#           files: |
+#             ${{ env.MTAR_FILE }}
+#           draft: false
+#           prerelease: false 
