@@ -6,6 +6,17 @@
 
 # V1.1.6
 
+
+# V1.1.7
+
+This release includes:
+
+- PR TEST RELEASE 1.1.7
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/15)
+
+---
+
 This release includes:
 
 - PR TEST RELEASE 1.1.6
