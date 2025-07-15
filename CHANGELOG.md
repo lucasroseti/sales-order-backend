@@ -1,6 +1,16 @@
 # Changelog
 
 
+# V1.1.8
+
+This release includes:
+
+- PR TEST RELEASE 1.1.8
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/16)
+
+---
+
 # V1.1.5
 
 
