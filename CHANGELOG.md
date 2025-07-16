@@ -11,6 +11,16 @@ This release includes:
 
 ---
 
+# V1.1.9
+
+This release includes:
+
+- PR RELEASE 1.1.9
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/17)
+
+---
+
 # V1.1.8
 
 This release includes:
