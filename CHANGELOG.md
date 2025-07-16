@@ -1,6 +1,17 @@
 # Changelog
 
 
+# V1.1.11
+
+This release includes:
+
+- PR RELEASE 1.1.1
+- NEW FEATURE LOGS
+
+[🔎 See PR](https://github.com/lucasroseti/sales-order-backend/pull/19)
+
+---
+
 # V1.1.10
 
 This release includes:
